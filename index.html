@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nourish – Level Your Nutrition</title>
+  <meta name="description" content="Nourish verwandelt gesunde Ernährung in ein RPG-Abenteuer. Sammle XP, steige auf, besiege Bosse – gemeinsam mit Freunden.">
+  <style>
+    :root {
+      --bg:       #0F172A;
+      --surface:  #1E293B;
+      --border:   #334155;
+      --primary:  #22D3EE;
+      --purple:   #A78BFA;
+      --text:     #F1F5F9;
+      --muted:    #94A3B8;
+      --streak:   #F59E0B;
+      --green:    #22C55E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .nav-logo-text { font-size: 18px; font-weight: 700; color: var(--text); }
+    .nav-cta {
+      background: var(--primary); color: #0F172A;
+      padding: 8px 20px; border-radius: 20px;
+      font-weight: 700; font-size: 14px;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(34,211,238,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(167,139,250,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,211,238,.1);
+      border: 1px solid rgba(34,211,238,.3);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px; color: var(--primary);
+      margin-bottom: 24px;
+    }
+    .hero-nori { font-size: 72px; line-height: 1; margin-bottom: 20px; }
+    h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 800; line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 40%, var(--primary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(18px, 3vw, 22px);
+      color: var(--muted);
+      max-width: 520px; margin: 0 auto 40px;
+    }
+    .hero-buttons {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 64px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      color: #fff; font-weight: 700; font-size: 16px;
+      padding: 14px 32px; border-radius: 14px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .2s, opacity .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); opacity: .92; }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text); font-weight: 600; font-size: 16px;
+      padding: 14px 32px; border-radius: 14px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color .2s;
+    }
+    .btn-secondary:hover { border-color: var(--primary); }
+
+    /* ── PHONES ── */
+    .phones {
+      display: flex; gap: 20px; justify-content: center;
+      align-items: flex-end; flex-wrap: wrap;
+    }
+    .phone {
+      width: 160px;
+      background: #1a2540;
+      border-radius: 28px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    }
+    .phone.tall { height: 320px; }
+    .phone.mid  { height: 280px; margin-bottom: 20px; }
+    .phone-screen {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      padding: 16px 12px 12px;
+      gap: 8px;
+    }
+    .ph-bar { border-radius: 4px; opacity: .3; }
+    .ph-bar.w100 { width: 100%; }
+    .ph-bar.w70  { width: 70%; }
+    .ph-bar.w50  { width: 50%; }
+    .ph-bar.h12  { height: 12px; }
+    .ph-bar.h20  { height: 20px; }
+    .ph-bar.h40  { height: 40px; }
+    .ph-bar.h60  { height: 60px; }
+    .ph-bar.primary { background: var(--primary); }
+    .ph-bar.purple  { background: var(--purple); }
+    .ph-bar.gold    { background: var(--streak); }
+    .ph-bar.white   { background: #fff; }
+    .ph-nori { font-size: 36px; text-align: center; padding: 8px 0; }
+
+    /* ── FEATURES ── */
+    section { padding: 80px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--primary); letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    h2 {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; margin-bottom: 12px;
+    }
+    .section-sub {
+      text-align: center; color: var(--muted);
+      font-size: 16px; max-width: 520px;
+      margin: 0 auto 56px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      transition: border-color .2s, transform .2s;
+    }
+    .feature-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── STATS ── */
+    .stats { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stats-grid {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 0;
+    }
+    .stat {
+      padding: 40px 48px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-size: 40px; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* ── BETA ── */
+    .beta { background: var(--bg); }
+    .beta-box {
+      max-width: 600px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+    }
+    .beta-box h2 { margin-bottom: 12px; }
+    .beta-box p  { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+    .email-form { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .email-input {
+      flex: 1; min-width: 220px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 18px;
+      color: var(--text); font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .email-input:focus { border-color: var(--primary); }
+    .email-input::placeholder { color: var(--muted); }
+    .btn-submit {
+      background: var(--primary); color: #0F172A;
+      font-weight: 700; font-size: 15px;
+      padding: 13px 28px; border-radius: 12px;
+      border: none; cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-submit:hover { opacity: .85; }
+    .divider-or {
+      display: flex; align-items: center; gap: 16px;
+      color: var(--muted); font-size: 13px;
+      margin: 24px 0;
+    }
+    .divider-or::before, .divider-or::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+    .testflight-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 24px;
+      color: var(--muted); font-size: 14px;
+      text-decoration: none; cursor: default;
+    }
+    .testflight-badge {
+      background: var(--border); color: var(--muted);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 6px;
+      letter-spacing: .05em;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .footer-logo { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+    .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 14px; }
+    .footer-links a:hover { color: var(--primary); }
+    .footer-copy { color: var(--muted); font-size: 13px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 12px 20px; }
+      .stat { padding: 28px 24px; border-right: none; border-bottom: 1px solid var(--border); }
+      .stat:last-child { border-bottom: none; }
+      .beta-box { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">🐉</div>
+    <span class="nav-logo-text">Nourish</span>
+  </a>
+  <a class="nav-cta" href="#beta">Beta testen</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🚀 Bald im App Store</div>
+  <div class="hero-nori">🐉</div>
+  <h1>Level Your<br>Nutrition</h1>
+  <p class="hero-sub">
+    Gesund essen war noch nie so motivierend. Sammle XP, steige auf,
+    besiege Bosse — und verwandle deine Ernährung in ein echtes Abenteuer.
+  </p>
+  <div class="hero-buttons">
+    <a class="btn-primary" href="#beta">🎮 Jetzt Beta testen</a>
+    <a class="btn-secondary" href="#features">Mehr erfahren ↓</a>
+  </div>
+
+  <!-- Phone Mockups -->
+  <div class="phones">
+    <div class="phone mid">
+      <div class="phone-screen">
+        <div class="ph-bar w70 h12 primary"></div>
+        <div class="ph-nori">🐉</div>
+        <div class="ph-bar w100 h40 primary" style="opacity:.15;border-radius:8px"></div>
+        <div class="ph-bar w100 h12 white"></div>
+        <div class="ph-bar w50 h12 white"></div>
+      </div>
+    </div>
+    <div class="phone tall">
+      <div class="phone-screen">
+        <div class="ph-bar w50 h20 primary"></div>
+        <div class="ph-nori">⚔️</div>
+        <div class="ph-bar w100 h60 purple" style="opacity:.2;border-radius:8px"></div>
+        <div class="ph-bar w100 h12 white"></div>
+        <div class="ph-bar w70 h12 white"></div>
+        <div class="ph-bar w100 h20 gold" style="opacity:.3;border-radius:6px"></div>
+      </div>
+    </div>
+    <div class="phone mid">
+      <div class="phone-screen">
+        <div class="ph-bar w70 h12 purple"></div>
+        <div class="ph-nori">🏆</div>
+        <div class="ph-bar w100 h12 white"></div>
+        <div class="ph-bar w70 h12 white"></div>
+        <div class="ph-bar w50 h12 primary"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Achievements</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Charakter-Klassen</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Boss-Typen</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Motivation</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <p class="section-label">Features</p>
+    <h2>Mehr als ein Kalorienzähler</h2>
+    <p class="section-sub">Nourish belohnt dich für echte Ernährungsqualität — nicht nur fürs Tracken.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,211,238,.12)">⚡</div>
+        <h3>XP & Level-System</h3>
+        <p>Jede gute Mahlzeit bringt Erfahrungspunkte. Steige auf, schalte Klassen frei und werde zum Ernährungs-Champion.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(167,139,250,.12)">🏆</div>
+        <h3>Achievements & Titel</h3>
+        <p>20 freischaltbare Errungenschaften, von „Erster Biss" bis „Legendär". Trage deinen Titel stolz unter deinem Gamertag.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,.12)">🔥</div>
+        <h3>Streaks & Quests</h3>
+        <p>Baue Tages-Streaks auf, wähle wöchentliche Quests und kassiere Loot-Boxen für deine Ausdauer.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,.12)">⚔️</div>
+        <h3>Boss-Raids</h3>
+        <p>Kämpfe gemeinsam gegen Bosse wie den Zuckertroll. Dein tägliches Essen ist dein Angriff.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,197,94,.12)">👥</div>
+        <h3>Social & Duelle</h3>
+        <p>Füge Freunde hinzu, schicke Motivation, fordere sie zum 7-Tage-Duell heraus und vergleiche im Leaderboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,211,238,.12)">📷</div>
+        <h3>Smart Logging</h3>
+        <p>Barcode-Scanner, KI-Foto-Analyse und ein Mahlzeit-Warenkorb machen das Loggen schnell und einfach.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BETA -->
+<section class="beta" id="beta">
+  <div class="beta-box">
+    <div style="font-size:48px;margin-bottom:16px">🎮</div>
+    <h2>Werde Beta-Tester</h2>
+    <p>
+      Nourish ist in der Entwicklung und sucht echte Nutzer für den ersten Test.
+      Trag deine E-Mail ein — ich melde mich sobald der Beta-Zugang offen ist.
+    </p>
+
+    <form class="email-form" onsubmit="handleSubmit(event)">
+      <input
+        class="email-input"
+        type="email"
+        id="emailInput"
+        placeholder="deine@email.de"
+        required
+      >
+      <button class="btn-submit" type="submit">Anmelden ✓</button>
+    </form>
+    <p id="formMsg" style="margin-top:14px;font-size:14px;color:var(--green);display:none">
+      ✅ Danke! Ich melde mich sobald der Beta-Zugang da ist.
+    </p>
+
+    <div class="divider-or">oder</div>
+
+    <a class="testflight-btn" href="#" title="TestFlight-Link folgt bald">
+      <span>🍎 TestFlight Beta</span>
+      <span class="testflight-badge">BALD</span>
+    </a>
+    <p style="margin-top:12px;font-size:12px;color:var(--muted)">
+      iOS Beta via TestFlight — folgt sobald der Apple Developer Account aktiv ist.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🐉 Nourish</div>
+  <div class="footer-links">
+    <a href="privacy.html">Datenschutz</a>
+    <a href="impressum.html">Impressum</a>
+  </div>
+  <p class="footer-copy">© 2026 Nourish · Gebaut mit 🐉 und viel Gemüse</p>
+</footer>
+
+<script>
+  function handleSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    // TODO: Ersetze mit deiner echten E-Mail oder Mailchimp-Endpoint
+    window.location.href = 'mailto:jana.haase11@gmail.com?subject=Nourish Beta-Anmeldung&body=Beta-Tester: ' + email;
+    document.getElementById('formMsg').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
